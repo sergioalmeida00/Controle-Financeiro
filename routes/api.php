@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BankAccount\BankAccountController;
+use App\Http\Controllers\Api\Category\CategoryController;
 use App\Http\Controllers\Api\Transaction\TransactionController;
 use App\Http\Controllers\Api\User\AuthController;
 use App\Http\Controllers\Api\User\UserController;
@@ -31,5 +32,10 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/register', [TransactionController::class, 'store']);
         Route::put('/update/{id}', [TransactionController::class, 'update']);
         Route::delete('/delete/{id}', [TransactionController::class, 'destroy']);
+    });
+
+    //CATEGORY
+    Route::prefix('category')->group(function () {
+        Route::get('/', [CategoryController::class, 'show']);
     });
 });
