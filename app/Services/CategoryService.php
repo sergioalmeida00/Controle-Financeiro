@@ -24,4 +24,15 @@ class CategoryService
             ->where('user_id', '=', $this->userId)
             ->get();
     }
+
+    public function register($data)
+    {
+        return $this->repository
+            ->create([
+                'user_id' => $this->userId,
+                'name' => $data['name'],
+                'icon' => $data['icon'],
+                'type' => $data['type']
+            ]);
+    }
 }

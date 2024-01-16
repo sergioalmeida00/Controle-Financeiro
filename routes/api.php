@@ -37,5 +37,6 @@ Route::middleware('auth:api')->group(function () {
     //CATEGORY
     Route::prefix('category')->group(function () {
         Route::get('/', [CategoryController::class, 'show']);
+        Route::post('/register', [CategoryController::class, 'store']);
     });
 });
