@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Transaction;
 use App\Services\ValidateBankAccountsOwnership;
 use App\Services\ValidateTransactionsOwnership;
+use App\Services\ValidateCategoryOwnership;
 use App\Services\Traits\ServiceTraits;
 use Carbon\Carbon;
 use Exception;
@@ -17,16 +18,19 @@ class TransactionService
     protected $userId;
     protected $validateBankAccountsOwnership;
     protected $validateTransactionsOwnership;
+    protected $validateCategoryOwnership;
 
     public function __construct(
         Transaction $model,
         ValidateBankAccountsOwnership $validateBankAccountsOwnership,
-        ValidateTransactionsOwnership $validateTransactionsOwnership
+        ValidateTransactionsOwnership $validateTransactionsOwnership,
+        ValidateCategoryOwnership $validateCategoryOwnership
     ) {
         $this->repository = $model;
         $this->userId = $this->getUserAuth();
         $this->validateBankAccountsOwnership = $validateBankAccountsOwnership;
         $this->validateTransactionsOwnership = $validateTransactionsOwnership;
+        $this->validateCategoryOwnership = $validateCategoryOwnership;
     }
 
     public function register($data)
@@ -35,6 +39,13 @@ class TransactionService
             $data['bank_account_id'],
             $this->userId
         );
+
+        if (isset($data['category_id'])) {
+            $this->validateCategoryOwnership->validate(
+                $data['category_id'],
+                $this->userId
+            );
+        }
 
         return $this->repository
             ->create([
