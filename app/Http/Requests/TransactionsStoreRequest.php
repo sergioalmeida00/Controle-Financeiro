@@ -24,8 +24,8 @@ class TransactionsStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'bank_account_id' => ['required','exists:bank_accounts,id'],
-            'category_id' => ['nullable','exists:categories,id'],
+            'bank_account_id' => ['required', 'uuid', 'exists:bank_accounts,id'],
+            'category_id' => ['nullable', 'uuid', 'exists:categories,id'],
             'name' => ['required', 'min:3', 'string'],
             'value' => ['required', 'numeric', 'min:0'],
             'type' => ['required', 'in:INCOME,EXPENSE', 'regex:/^[A-Z]+$/'],
