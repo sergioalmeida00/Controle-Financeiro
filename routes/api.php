@@ -14,7 +14,8 @@ Route::post('/auth/create', [UserController::class, 'store']);
 
 // Rotas protegidas por JWT
 Route::middleware('auth:api')->group(function () {
-    Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::get('/auth/me', [AuthController::class, 'me'])->name('auth.me');
+    Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
     // Usuario
     // Route::prefix('user')->group(function () {
     //     Route::post('/create', [UserController::class, 'store']);
