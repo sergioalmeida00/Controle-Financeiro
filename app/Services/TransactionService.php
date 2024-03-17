@@ -128,14 +128,16 @@ class TransactionService
 
                 $query->where('user_id', '=', $this->userId);
             })
+            ->with('category')
             ->orderBy('date')
             ->get();
     }
 
     private function getFirstAndLastDayOfMonth($year, $month)
     {
-        $firstDay = Carbon::create($year, $month, 1)->startOfMonth();
-        $lastDay = Carbon::create($year, $month, 1)->endOfMonth();
+        $firstDay = Carbon::createFromDate($year, $month + 1, 1)->startOfMonth();
+        $lastDay = $firstDay->copy()->endOfMonth();
+
 
         return [
             'firstDay' => $firstDay->toDateString(),

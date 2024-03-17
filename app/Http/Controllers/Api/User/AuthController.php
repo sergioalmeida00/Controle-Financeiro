@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AuthResource;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
@@ -30,6 +31,6 @@ class AuthController extends Controller
 
     public function me()
     {
-        return response()->json(auth()->user());
+        return new AuthResource(auth()->user());
     }
 }

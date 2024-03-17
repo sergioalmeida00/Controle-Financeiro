@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\BankAccount;
+use App\Models\Transaction;
 use App\Services\ValidateBankAccountsOwnership;
 use App\Services\Traits\ServiceTraits;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class BankAccountService
 {
@@ -13,12 +15,14 @@ class BankAccountService
     protected $repository;
     protected $userId;
     protected $validateBankAccountsOwnership;
+    protected $transactionRepository;
 
-    public function __construct(BankAccount $model, ValidateBankAccountsOwnership $validateBankAccountsOwnership)
+    public function __construct(BankAccount $model, ValidateBankAccountsOwnership $validateBankAccountsOwnership, Transaction $transactionRepository)
     {
         $this->repository = $model;
         $this->userId = $this->getUserAuth();
         $this->validateBankAccountsOwnership = $validateBankAccountsOwnership;
+        $this->transactionRepository = $transactionRepository;
     }
 
     public function register($data)
@@ -52,16 +56,30 @@ class BankAccountService
         try {
             $bankAccount = $this->findAllTransactionBankAccount($idBankAccount);
 
+            if (!$bankAccount) {
+                throw new \Exception('Bank account not found');
+            }
+
+            //INICIA PARA DELETAR AS TRANSAÇÕES CASO EXISTE E A CONTA BANCARIA;
+            DB::beginTransaction();
+
             if ($bankAccount->transactions->isNotEmpty()) {
-                throw new \Exception('Bank account has transactions');
+                $this->transactionRepository
+                    ->where('user_id', '=', $this->userId)
+                    ->where('bank_account_id', '=', $idBankAccount)
+                    ->delete();
             }
 
             $this->repository
                 ->where('user_id', '=', $this->userId)
                 ->where('id', '=', $idBankAccount)
                 ->delete();
+
+            DB::commit();
         } catch (\Exception $exception) {
-            throw new \Exception('Bank account has transactions');
+            DB::rollBack();
+
+            throw new \Exception('Failed to delete bank account');
         }
     }
 
@@ -76,5 +94,28 @@ class BankAccountService
             ->first();
 
         return $transactions;
+    }
+
+    public function getAllBankAccount()
+    {
+        $responseBankAccounts = $this->repository
+            ->where('user_id', '=', $this->userId)
+            ->with('transactions.category')
+            ->orderBy('name')
+            ->get();
+
+        foreach ($responseBankAccounts as $key => $account) {
+            $totalTransactions = 0;
+
+            foreach ($account->transactions as $key => $transaction) {
+                if (!empty($transaction)) {
+                    $totalTransactions += ($transaction['type'] === 'INCOME' ? $transaction['value'] : -$transaction['value']);
+                }
+            }
+
+            $account->currentBalance = $account->initial_balance + $totalTransactions;
+        }
+
+        return $responseBankAccounts;
     }
 }

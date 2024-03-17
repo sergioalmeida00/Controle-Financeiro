@@ -23,6 +23,7 @@ Route::middleware('auth:api')->group(function () {
 
     //BANK-ACCOUNT
     Route::prefix('bank-account')->group(function () {
+        Route::get('/list', [BankAccountController::class, 'getAll']);
         Route::get('/{id}/extract', [BankAccountController::class, 'show']);
         Route::post('/register', [BankAccountController::class, 'store']);
         Route::put('/update/{id}', [BankAccountController::class, 'update']);

@@ -27,6 +27,12 @@ class BankAccountController extends Controller
         }
     }
 
+    public function getAll()
+    {
+        $responseBankAccounts = $this->bankAccountService->getAllBankAccount();
+        return response()->json($responseBankAccounts, 200);
+    }
+
     public function store(BankAccountStoreOrUpdateRequest $request)
     {
         $dataBankAccount = $request->all();
@@ -54,7 +60,7 @@ class BankAccountController extends Controller
         try {
             $this->bankAccountService->delete($id);
 
-            return response()->json(['message' => 'Bank account deleted successfully']);
+            return response()->json(['message' => 'Bank account deleted successfully'], 204);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
