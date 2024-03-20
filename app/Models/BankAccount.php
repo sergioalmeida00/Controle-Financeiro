@@ -12,7 +12,7 @@ class BankAccount extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = ['name', 'initial_balance', 'type', 'color', 'user_id'];
+    protected $fillable = ['name', 'initial_balance', 'type', 'color', 'user_id','goal'];
 
     public function user()
     {

@@ -31,6 +31,6 @@ class AuthController extends Controller
 
     public function me()
     {
-        return new AuthResource(auth()->user());
+        return auth()->user();
     }
 }

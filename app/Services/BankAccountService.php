@@ -27,12 +27,17 @@ class BankAccountService
 
     public function register($data)
     {
+        //SÓ PODE CADASTRAR META CASO O TIPO SEJA INVESTIMENTO
+        $data = $this->removeValueGoalType($data);
+
         $data['user_id'] = $this->userId;
         return $this->repository->create($data);
     }
 
     public function update($data, $idBankAccount)
     {
+        $data = $this->removeValueGoalType($data);
+
         try {
             $bankAccount = $this->repository
                 ->where('user_id', '=', $this->userId)
@@ -43,7 +48,8 @@ class BankAccountService
                 'name' => $data['name'],
                 'initial_balance' => $data['initial_balance'],
                 'type' => $data['type'],
-                'color' => $data['color']
+                'color' => $data['color'],
+                'goal' => $data['goal'] ?? 0
             ]);
         } catch (Exception $exception) {
             // Lança uma exceção indicando que a conta bancária não foi encontrada
@@ -107,6 +113,10 @@ class BankAccountService
         foreach ($responseBankAccounts as $key => $account) {
             $totalTransactions = 0;
 
+            if ($account->type !== 'INVESTMENT') {
+                unset($account->goal);
+            }
+
             foreach ($account->transactions as $key => $transaction) {
                 if (!empty($transaction)) {
                     $totalTransactions += ($transaction['type'] === 'INCOME' ? $transaction['value'] : -$transaction['value']);
@@ -114,8 +124,22 @@ class BankAccountService
             }
 
             $account->currentBalance = $account->initial_balance + $totalTransactions;
+
+            //Retorna a informação do percentual
+            if ($account->type === 'INVESTMENT' && $account->goal > 0) {
+                $account->currentGoal = ($account->currentBalance / $account->goal) * 100;
+            }
         }
 
         return $responseBankAccounts;
+    }
+
+    private function removeValueGoalType($dataGoal)
+    {
+        if ($dataGoal['type'] !== 'INVESTMENT') {
+            unset($dataGoal['goal']);
+        }
+
+        return $dataGoal;
     }
 }
