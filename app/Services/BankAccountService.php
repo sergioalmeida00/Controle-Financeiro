@@ -110,6 +110,7 @@ class BankAccountService
             ->orderBy('name')
             ->get();
 
+
         foreach ($responseBankAccounts as $key => $account) {
             $totalTransactions = 0;
 
@@ -125,10 +126,12 @@ class BankAccountService
 
             $account->currentBalance = $account->initial_balance + $totalTransactions;
 
+
             //Retorna a informação do percentual
             if ($account->type === 'INVESTMENT' && $account->goal > 0) {
                 $account->currentGoal = ($account->currentBalance / $account->goal) * 100;
             }
+
         }
 
         return $responseBankAccounts;
